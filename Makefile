@@ -53,6 +53,7 @@ arduino-serial-server: arduino-serial-lib.o
 
 
 clean:
+	cp arduino-serial ./MonkeySDK/sample
 	rm -f $(OBJ) arduino-serial arduino-serial.exe *.o *.a
 	rm -f $(OBJ) arduino-serial-server arduino-serial-server.exe *.o *.a
 	rm -f mongoose/mongoose.o

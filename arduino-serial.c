@@ -48,11 +48,17 @@
 #include <stdio.h>    // Standard input/output definitions
 #include <stdlib.h>
 #include <string.h>   // String function definitions
-#include <unistd.h>   // for usleep()
+#include <unistd.h>   // for usleep() and for fork()
 #include <getopt.h>
 
 #include "arduino-serial-lib.h"
 
+/*Written by Richard Tsai*/
+#include <sys/types.h> /* for pid_t */
+#include <sys/wait.h> /* for wait */
+
+/*Written by Richard Tsai*/
+enum picOption { black, num1, num2, num3, num4, num5, neverodd, robot1, zbama, cat};
 
 //
 void usage(void)
@@ -88,9 +94,13 @@ void error(char* msg)
     exit(EXIT_FAILURE);
 }
 
+/*Written by Richard Tsai*/
+int MLP_picture(char* subbuf, enum picOption picChosen);
+
 int main(int argc, char *argv[])
 {
     const int buf_max = 256;
+    const int subbuf_max = 4;
 
     int fd = -1;
     char serialport[buf_max];
@@ -99,7 +109,9 @@ int main(int argc, char *argv[])
     char eolchar = '\n';
     int timeout = 5000;
     char buf[buf_max];
+    char subbuf[subbuf_max];
     int rc,n;
+    enum picOption picChosen = black;
 
     if (argc==1) {
         usage();
@@ -189,10 +201,19 @@ int main(int argc, char *argv[])
             break;
         case 'r':
             if( fd == -1 ) error("serial port not opened");
-            memset(buf,0,buf_max);  //
-            serialport_read_until(fd, buf, eolchar, buf_max, timeout);
-            if( !quiet ) printf("read string:");
-            printf("%s\n", buf);
+            do {
+              memset(buf,0,buf_max);  //
+              memset(subbuf,0,subbuf_max);  //
+              serialport_read_until(fd, buf, '!', buf_max, timeout);
+              if( !quiet ) printf("read string: ");
+
+              memcpy( subbuf, &buf[12], 3 );
+              printf("%s\n", buf);
+
+              picChosen = MLP_picture(subbuf, picChosen);
+              // Mac_music
+
+            } while(strcmp (subbuf,"MLPEnd") != 0);
             break;
         case 'F':
             if( fd == -1 ) error("serial port not opened");
@@ -206,3 +227,35 @@ int main(int argc, char *argv[])
     exit(EXIT_SUCCESS);
 } // end main
 
+/*Written by Richard Tsai*/
+int MLP_picture(char* subbuf, enum picOption picChosen)
+{
+  int status;
+
+  if ( !strcmp (subbuf,"Nea") && picChosen != robot1 ) {
+    picChosen = robot1;
+    /*Spawn a child to run the program.*/
+    pid_t pid=fork();
+    if (pid==0) { /* pid==0; child process */
+      status = system("../download-playlist playscript7.script");
+      exit(127); /* only if execv fails */
+    }
+    else { /* pid!=0; parent process */
+      waitpid(pid,0,0); /* wait for child to exit */
+    }
+  }
+  else if ( !strcmp (subbuf,"Far") && picChosen != cat ) {
+    picChosen = cat;
+    /*Spawn a child to run the program.*/
+    pid_t pid=fork();
+    if (pid==0) { /* pid==0; child process */
+      status = system("../download-playlist playscript9.script");
+      exit(127); /* only if execv fails */
+    }
+    else { /* pid!=0; parent process */
+      waitpid(pid,0,0); /* wait for child to exit */
+    }
+  }
+
+  return picChosen;
+}
