@@ -55,7 +55,8 @@
 
 /*Written by Richard Tsai*/
 #include <sys/types.h> /* for pid_t */
-#include <sys/wait.h> /* for wait */
+#include <sys/wait.h>  /* for wait */
+#include <time.h>      /* clock_t, clock, CLOCKS_PER_SEC */
 
 /*Written by Richard Tsai*/
 enum picOption { black, num1, num2, num3, num4, num5, neverodd, robot1, zbama, cat};
@@ -95,12 +96,12 @@ void error(char* msg)
 }
 
 /*Written by Richard Tsai*/
-int MLP_picture(char* subbuf, enum picOption picChosen);
+int MLP_picture(char* subbuf, enum picOption picChosen, time_t* picTimer);
 
 int main(int argc, char *argv[])
 {
     const int buf_max = 256;
-    const int subbuf_max = 4;
+    const int subbuf_max = 8;
 
     int fd = -1;
     char serialport[buf_max];
@@ -112,6 +113,7 @@ int main(int argc, char *argv[])
     char subbuf[subbuf_max];
     int rc,n;
     enum picOption picChosen = black;
+    time_t picTimer = time(NULL);
 
     if (argc==1) {
         usage();
@@ -204,13 +206,14 @@ int main(int argc, char *argv[])
             do {
               memset(buf,0,buf_max);  //
               memset(subbuf,0,subbuf_max);  //
-              serialport_read_until(fd, buf, '!', buf_max, timeout);
+              serialport_read_until(fd, buf, '!', buf_max, timeout/5);
               if( !quiet ) printf("read string: ");
 
-              memcpy( subbuf, &buf[12], 3 );
               printf("%s\n", buf);
+              printf("picTimer: %f\n", difftime(time(NULL), picTimer));
 
-              picChosen = MLP_picture(subbuf, picChosen);
+              memcpy( subbuf, &buf[12], 7 );
+              picChosen = MLP_picture(subbuf, picChosen, &picTimer);
               // Mac_music
 
             } while(strcmp (subbuf,"MLPEnd") != 0);
@@ -228,34 +231,38 @@ int main(int argc, char *argv[])
 } // end main
 
 /*Written by Richard Tsai*/
-int MLP_picture(char* subbuf, enum picOption picChosen)
+int MLP_picture(char* subbuf, enum picOption picChosen, time_t* picTimer)
 {
   int status;
 
-  if ( !strcmp (subbuf,"Nea") && picChosen != robot1 ) {
+  if ( !strcmp (subbuf,"BikeNea") && picChosen != robot1 && (int)(difftime(time(NULL), *picTimer)) >= 10 ) {
     picChosen = robot1;
-    /*Spawn a child to run the program.*/
-    pid_t pid=fork();
-    if (pid==0) { /* pid==0; child process */
-      status = system("../download-playlist playscript7.script");
-      exit(127); /* only if execv fails */
-    }
-    else { /* pid!=0; parent process */
-      waitpid(pid,0,0); /* wait for child to exit */
-    }
+    *picTimer = time(NULL);
+    status = system("../download-playlist playscript7.script");
   }
-  else if ( !strcmp (subbuf,"Far") && picChosen != cat ) {
+  else if ( !strcmp (subbuf,"BikeFar") && picChosen != cat && (int)(difftime(time(NULL), *picTimer)) >= 10 ) {
     picChosen = cat;
-    /*Spawn a child to run the program.*/
-    pid_t pid=fork();
-    if (pid==0) { /* pid==0; child process */
-      status = system("../download-playlist playscript9.script");
-      exit(127); /* only if execv fails */
-    }
-    else { /* pid!=0; parent process */
-      waitpid(pid,0,0); /* wait for child to exit */
-    }
+    *picTimer = time(NULL);
+    status = system("../download-playlist playscript9.script");
   }
-
+  else if ( !strcmp (subbuf,"Store1A") && picChosen != num1 && (int)(difftime(time(NULL), *picTimer)) >= 10 ) {
+    picChosen = num1;
+    *picTimer = time(NULL);
+    status = system("../download-playlist playscript1.script");
+  }
+  else if ( !strcmp (subbuf,"Store2A") && picChosen != num2 && (int)(difftime(time(NULL), *picTimer)) >= 10 ) {
+    picChosen = num2;
+    *picTimer = time(NULL);
+    status = system("../download-playlist playscript2.script");
+    // /*Spawn a child to run the program.*/
+    // pid_t pid=fork();
+    // if (pid==0) { /* pid==0; child process */
+    //   status = system("../download-playlist playscript2.script");
+    //   exit(127); /* only if execv fails */
+    // }
+    // else { /* pid!=0; parent process */
+    //   waitpid(pid,0,0); /* wait for child to exit */
+    // }
+  }
   return picChosen;
 }
