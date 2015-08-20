@@ -68,9 +68,9 @@ void notifyAddrRSSI( String ATReturnCen )
         writePerMessage("RSSI: ");
         writePerVariable( String(averageRSSI) );
                   
-        if( averageRSSI>72 )
+        if( averageRSSI>75 )
           writePerMessage(" => BikeFar!");
-        else if( averageRSSI<=72 )
+        else if( averageRSSI<=75 )
           writePerMessage(" => BikeNear!");        
     }
   //Store1
@@ -83,7 +83,7 @@ void notifyAddrRSSI( String ATReturnCen )
       writePerMessage("RSSI: ");
       writePerVariable( String(RSSISignalInt) );
      
-      if( RSSISignalInt<=72 )
+      if( RSSISignalInt<=75 )
         writePerMessage(" => Store1Appear!");
       else
         writePerMessage("!");
@@ -98,26 +98,11 @@ void notifyAddrRSSI( String ATReturnCen )
       writePerMessage("RSSI: ");
       writePerVariable( String(RSSISignalInt) );
      
-      if( RSSISignalInt<=72 )
+      if( RSSISignalInt<=75 )
         writePerMessage(" => Store2Appear!");
       else
         writePerMessage("!");
     }
-  //Store3
-    indexINQ = ATReturnCen.indexOf("+INQ: 80:C1:BE:26:EF:20,FF00,-");
-    if( indexINQ != -1){
-      indexINQ += 30;
-      int RSSISignalInt = 0;
-      RSSISignalInt = (ATReturnCen[indexINQ]-48)*10 + (ATReturnCen[indexINQ+1]-48);
-      
-      writePerMessage("RSSI: ");
-      writePerVariable( String(RSSISignalInt) );
-     
-      if( RSSISignalInt<=72 )
-        writePerMessage(" => Store3Appear!");
-      else
-        writePerMessage("!");
-    }  
 }
 
 void writePerMessage(char* message){

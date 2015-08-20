@@ -59,7 +59,7 @@
 #include <time.h>      /* clock_t, clock, CLOCKS_PER_SEC */
 
 /*Written by Richard Tsai*/
-enum picOption { black, num1, num2, num3, num4, num5, neverodd, robot1, zbama, cat};
+enum picOption { black, num1, num2, num3, num4, num5, apple, starbucks, cslogo, zbama, cat, dog, natalie_fish };
 
 //
 void usage(void)
@@ -97,6 +97,7 @@ void error(char* msg)
 
 /*Written by Richard Tsai*/
 int MLP_picture(char* subbuf, enum picOption picChosen, time_t* picTimer);
+const char* getPicChosenName(enum picOption picChosen);
 
 int main(int argc, char *argv[])
 {
@@ -210,11 +211,12 @@ int main(int argc, char *argv[])
               if( !quiet ) printf("read string: ");
 
               printf("%s\n", buf);
-              printf("picTimer: %f\n", difftime(time(NULL), picTimer));
+              printf("picChosen: %s, picTimer: %f\n", getPicChosenName(picChosen), difftime(time(NULL), picTimer));
 
               memcpy( subbuf, &buf[12], 7 );
               picChosen = MLP_picture(subbuf, picChosen, &picTimer);
               // Mac_music
+              // ./arduino-serial -b 115200 -p /dev/tty.wchusbserial1410 -q -r -F
 
             } while(strcmp (subbuf,"MLPEnd") != 0);
             break;
@@ -235,25 +237,31 @@ int MLP_picture(char* subbuf, enum picOption picChosen, time_t* picTimer)
 {
   int status;
 
-  if ( !strcmp (subbuf,"BikeNea") && picChosen != robot1 && (int)(difftime(time(NULL), *picTimer)) >= 10 ) {
-    picChosen = robot1;
-    *picTimer = time(NULL);
-    status = system("../download-playlist playscript7.script");
-  }
-  else if ( !strcmp (subbuf,"BikeFar") && picChosen != cat && (int)(difftime(time(NULL), *picTimer)) >= 10 ) {
+  if ( !strcmp (subbuf,"BikeNea") && picChosen != cat && (int)(difftime(time(NULL), *picTimer)) >= 1 ) {
     picChosen = cat;
     *picTimer = time(NULL);
-    status = system("../download-playlist playscript9.script");
+    status = system("./dokermit6");
   }
-  else if ( !strcmp (subbuf,"Store1A") && picChosen != num1 && (int)(difftime(time(NULL), *picTimer)) >= 10 ) {
-    picChosen = num1;
+  else if ( !strcmp (subbuf,"BikeFar") && picChosen != natalie_fish && (int)(difftime(time(NULL), *picTimer)) >= 1 ) {
+    picChosen = natalie_fish;
     *picTimer = time(NULL);
-    status = system("../download-playlist playscript1.script");
+    status = system("./dokermit8");
+
   }
-  else if ( !strcmp (subbuf,"Store2A") && picChosen != num2 && (int)(difftime(time(NULL), *picTimer)) >= 10 ) {
-    picChosen = num2;
+  else if ( !strcmp (subbuf,"Store1A") && picChosen != apple && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
+    picChosen = apple;
     *picTimer = time(NULL);
-    status = system("../download-playlist playscript2.script");
+    status = system("../download-playlist exbihition10.script");
+  }
+  else if ( !strcmp (subbuf,"Store2A") && picChosen != starbucks && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
+    picChosen = starbucks;
+    *picTimer = time(NULL);
+    status = system("../download-playlist exbihition12.script");
+  }
+  else if ( !strcmp (subbuf,"Store3A") && picChosen != cslogo && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
+    picChosen = cslogo;
+    *picTimer = time(NULL);
+    status = system("./dokermit8");
     // /*Spawn a child to run the program.*/
     // pid_t pid=fork();
     // if (pid==0) { /* pid==0; child process */
@@ -265,4 +273,26 @@ int MLP_picture(char* subbuf, enum picOption picChosen, time_t* picTimer)
     // }
   }
   return picChosen;
+}
+
+const char* getPicChosenName(enum picOption picChosen)
+{
+     switch (picChosen)
+   {
+      case black: return "black";
+      case num1: return "num1";
+      case num2: return "num2";
+      case num3: return "num3";
+      case num4: return "num4";
+      case num5: return "num5";
+      case apple: return "apple";
+      case starbucks: return "starbucks";
+      case cslogo: return "cslogo";
+      case zbama: return "zbama";
+      case cat: return "cat";
+      case dog: return "dog";
+      case natalie_fish: return "natalie_fish";
+
+      /* etc... */
+   }
 }
