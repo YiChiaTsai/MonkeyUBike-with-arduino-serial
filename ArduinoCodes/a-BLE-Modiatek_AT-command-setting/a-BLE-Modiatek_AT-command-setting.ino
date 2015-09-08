@@ -9,8 +9,8 @@ void setup()
 {
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
-  BTSerial.begin(115200);  // 啟動軟體序列埠,設定傳輸速度
-  Serial.begin(115200);
+  BTSerial.begin(9600);  // 啟動軟體序列埠,設定傳輸速度
+  Serial.begin(9600);
 }
 
 void loop()
@@ -49,8 +49,8 @@ void loop()
         BTSerial.write("AT\r\n");
         break;
       case  'b' :     // Set ble's name CENTRAL PERIPHERAL
-        Serial.println("AT+NAMESTORE2-PERIPHERAL\r");
-        BTSerial.write("AT+NAMESTORE2-PERIPHERAL\r\n");
+        Serial.println("AT+NAMEMAC-DATA\r");
+        BTSerial.write("AT+NAMEMAC-DATA\r\n");
         break;
       case  'c' :     // Set password
         Serial.println("AT+PIN835865\r");
@@ -61,8 +61,8 @@ void loop()
         BTSerial.write("AT+BAUD8\r\n");
         break;
       case  'e' :     // Set role as central
-        Serial.println("AT+ROLE1\r");
-        BTSerial.write("AT+ROLE1\r\n");
+        Serial.println("AT+BAUD\r");
+        BTSerial.write("AT+BAUD\r\n");
         break;
       case  'f' :     // Set role as peripheral
         Serial.println("AT+ROLE0\r");
@@ -73,8 +73,8 @@ void loop()
         BTSerial.write("AT+LADDR\r\n");
         break;
       case  'h' :     // Get Inquire mode: mode, num, timeout
-        Serial.println("AT+INQM\r");
-        BTSerial.write("AT+INQM\r\n");
+        Serial.println("AT+INQM0,3,25\r");
+        BTSerial.write("AT+INQM0,3,25\r\n");
         break;
       case  'i' :     // (Bike which provides broadcast.) Set Inquire mode: mode, num, timeout
         Serial.println("AT+INQM0,8,5\r");
@@ -117,8 +117,8 @@ void loop()
         BTSerial.write("AT+BIND\r\n");
         break;
       case  's' :     // Set bind address
-        Serial.println("AT+BIND80,C1,BA,70,E3,B5\r");
-        BTSerial.write("AT+BIND80,C1,BA,70,E3,B5\r\n");
+        Serial.println("AT+BIND80,C1,BE,26,18,98\r");
+        BTSerial.write("AT+BIND80,C1,BE,26,18,98\r\n");
         break;    
       case  't' :     // Get cmode state
         Serial.println("AT+CMODE\r");

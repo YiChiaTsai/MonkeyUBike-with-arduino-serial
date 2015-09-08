@@ -59,6 +59,10 @@
 #include <time.h>      /* clock_t, clock, CLOCKS_PER_SEC */
 
 /*Written by Richard Tsai*/
+int nearStatus = 1;
+const int thresholdFar = 60; //Reality: 70, Laboratory: 70.
+const int thresholdNear = 55; //Reality: 60, Laboratory: 55.
+const int thresholdStore = 55; //Reality: 60, Laboratory: 55.
 enum picOption { black, num1, num2, num3, num4, num5, apple, starbucks, cslogo, zbama, cat, dog, natalie_fish };
 
 //
@@ -96,13 +100,13 @@ void error(char* msg)
 }
 
 /*Written by Richard Tsai*/
-int MLP_picture(char* subbuf, enum picOption picChosen, time_t* picTimer);
+int MLP_picture(char* objectType, int objectRSSI, enum picOption picChosen, time_t* picTimer);
 const char* getPicChosenName(enum picOption picChosen);
 
 int main(int argc, char *argv[])
 {
     const int buf_max = 256;
-    const int subbuf_max = 8;
+    const int object_max = 8;
 
     int fd = -1;
     char serialport[buf_max];
@@ -111,8 +115,12 @@ int main(int argc, char *argv[])
     char eolchar = '\n';
     int timeout = 5000;
     char buf[buf_max];
-    char subbuf[subbuf_max];
     int rc,n;
+
+    char objectType[object_max];
+    char stringRSSI[object_max];
+    int objectRSSI = 0;
+
     enum picOption picChosen = black;
     time_t picTimer = time(NULL);
 
@@ -206,19 +214,26 @@ int main(int argc, char *argv[])
             if( fd == -1 ) error("serial port not opened");
             do {
               memset(buf,0,buf_max);  //
-              memset(subbuf,0,subbuf_max);  //
+              memset(objectType,0,object_max);  //
+              memset(stringRSSI,0,object_max);  //
               serialport_read_until(fd, buf, '!', buf_max, timeout/5);
               if( !quiet ) printf("read string: ");
 
-              printf("%s\n", buf);
+              // printf("%s\n", buf);
               printf("picChosen: %s, picTimer: %f\n", getPicChosenName(picChosen), difftime(time(NULL), picTimer));
 
-              memcpy( subbuf, &buf[12], 7 );
-              picChosen = MLP_picture(subbuf, picChosen, &picTimer);
+              memcpy( objectType, &buf[0], 4 );
+              memcpy( stringRSSI, &buf[11], 3 );
+              objectRSSI = atoi(stringRSSI);
+
+              printf("%s: %d\n\n", objectType, objectRSSI);
+              // printf("%s\n\n", buf);
+              picChosen = MLP_picture(objectType, objectRSSI, picChosen, &picTimer);
+
               // Mac_music
               // ./arduino-serial -b 115200 -p /dev/tty.wchusbserial1410 -q -r -F
 
-            } while(strcmp (subbuf,"MLPEnd") != 0);
+            } while(strcmp (buf,"MLPEnd") != 0);
             break;
         case 'F':
             if( fd == -1 ) error("serial port not opened");
@@ -233,45 +248,58 @@ int main(int argc, char *argv[])
 } // end main
 
 /*Written by Richard Tsai*/
-int MLP_picture(char* subbuf, enum picOption picChosen, time_t* picTimer)
+int MLP_picture(char* objectType, int objectRSSI, enum picOption picChosen, time_t* picTimer)
 {
   int status;
 
-  if ( !strcmp (subbuf,"BikeNea") && picChosen != cat && (int)(difftime(time(NULL), *picTimer)) >= 1 ) {
-    picChosen = cat;
-    *picTimer = time(NULL);
-    status = system("./dokermit6");
-  }
-  else if ( !strcmp (subbuf,"BikeFar") && picChosen != natalie_fish && (int)(difftime(time(NULL), *picTimer)) >= 1 ) {
-    picChosen = natalie_fish;
-    *picTimer = time(NULL);
-    status = system("./dokermit8");
+  if ( objectRSSI == 0 ) {
 
   }
-  else if ( !strcmp (subbuf,"Store1A") && picChosen != apple && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
-    picChosen = apple;
+  else if ( !strcmp (objectType,"Bike") && picChosen != apple && objectRSSI < thresholdNear) {
+    nearStatus++;
+    if(nearStatus>1){
+      picChosen = apple;
+      *picTimer = time(NULL);
+      status = system("./dokermit6");
+    }
+  }
+  else if ( !strcmp (objectType,"Bike") && picChosen != starbucks && objectRSSI > thresholdFar) {
+    nearStatus--;
+    if(nearStatus<1){
+      picChosen = starbucks;
+      *picTimer = time(NULL);
+      status = system("./dokermit7");
+    }
+  }
+  else if ( !strcmp (objectType,"Sto1") && picChosen != cat && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
+    picChosen = cat;
     *picTimer = time(NULL);
     status = system("../download-playlist exbihition10.script");
   }
-  else if ( !strcmp (subbuf,"Store2A") && picChosen != starbucks && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
-    picChosen = starbucks;
+  else if ( !strcmp (objectType,"Sto2") && picChosen != natalie_fish && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
+    picChosen = natalie_fish;
     *picTimer = time(NULL);
     status = system("../download-playlist exbihition12.script");
   }
-  else if ( !strcmp (subbuf,"Store3A") && picChosen != cslogo && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
-    picChosen = cslogo;
+  else if ( !strcmp (objectType,"Sto3") && picChosen != dog && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
+    picChosen = dog;
     *picTimer = time(NULL);
-    status = system("./dokermit8");
-    // /*Spawn a child to run the program.*/
-    // pid_t pid=fork();
-    // if (pid==0) { /* pid==0; child process */
-    //   status = system("../download-playlist playscript2.script");
-    //   exit(127); /* only if execv fails */
-    // }
-    // else { /* pid!=0; parent process */
-    //   waitpid(pid,0,0); /* wait for child to exit */
-    // }
+    status = system("../download-playlist exbihition11.script");
   }
+  //   // status = system("./dokermit8");
+  //   // /*Spawn a child to run the program.*/
+  //   // pid_t pid=fork();
+  //   // if (pid==0) { /* pid==0; child process */
+  //   //   status = system("../download-playlist playscript2.script");
+  //   //   exit(127); /* only if execv fails */
+  //   // }
+  //   // else { /* pid!=0; parent process */
+  //   //   waitpid(pid,0,0); /* wait for child to exit */
+  //   // }
+  // }
+
+  // MLP_print(picChosen);
+
   return picChosen;
 }
 
