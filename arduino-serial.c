@@ -60,10 +60,13 @@
 
 /*Written by Richard Tsai*/
 int nearStatus = 1;
-const int thresholdFar = 60; //Reality: 70, Laboratory: 70.
-const int thresholdNear = 55; //Reality: 60, Laboratory: 55.
-const int thresholdStore = 55; //Reality: 60, Laboratory: 55.
-enum picOption { black, num1, num2, num3, num4, num5, apple, starbucks, cslogo, zbama, cat, dog, natalie_fish };
+int direction = 1; // 1 means same direction, 0 means adversity.
+int degree1 = 0;
+int degree2 = 0;
+const int thresholdFar = 70; //Reality: 70, Laboratory: 70.
+const int thresholdNear = 60; //Reality: 60, Laboratory: 55.
+const int thresholdStore = 60; //Reality: 60, Laboratory: 55.
+enum picOption { black, num1, num2, num3, num4, num5, apple, starbucks, cslogo, ncculogo, cat, dog, natalie_fish };
 
 //
 void usage(void)
@@ -118,7 +121,7 @@ int main(int argc, char *argv[])
     int rc,n;
 
     char objectType[object_max];
-    char stringRSSI[object_max];
+    char stringValue[object_max];
     int objectRSSI = 0;
 
     enum picOption picChosen = black;
@@ -215,7 +218,7 @@ int main(int argc, char *argv[])
             do {
               memset(buf,0,buf_max);  //
               memset(objectType,0,object_max);  //
-              memset(stringRSSI,0,object_max);  //
+              memset(stringValue,0,object_max);  //
               serialport_read_until(fd, buf, '!', buf_max, timeout/5);
               if( !quiet ) printf("read string: ");
 
@@ -223,10 +226,25 @@ int main(int argc, char *argv[])
               printf("picChosen: %s, picTimer: %f\n", getPicChosenName(picChosen), difftime(time(NULL), picTimer));
 
               memcpy( objectType, &buf[0], 4 );
-              memcpy( stringRSSI, &buf[11], 3 );
-              objectRSSI = atoi(stringRSSI);
+              memcpy( stringValue, &buf[11], 3 );
+              if(!strcmp (objectType,"Bike")) {
+                objectRSSI = atoi(stringValue);
+                printf("%s: %d\n\n", objectType, objectRSSI);
+              }
+              else if(!strcmp (objectType,"Deg1")) {
+                degree1 = atoi(stringValue);
+                printf("111 %s: %d\n\n", objectType, degree1);
+              }
+              else if(!strcmp (objectType,"Deg2")) {
+                degree2 = atoi(stringValue);
+                printf("222222 %s: %d\n\n", objectType, degree1);
+              }
 
-              printf("%s: %d\n\n", objectType, objectRSSI);
+              if( abs(degree1-degree2) > 90 && abs(degree1-degree2) < 270 )
+                direction = 0;
+              else
+                direction = 1;
+
               // printf("%s\n\n", buf);
               picChosen = MLP_picture(objectType, objectRSSI, picChosen, &picTimer);
 
@@ -255,21 +273,42 @@ int MLP_picture(char* objectType, int objectRSSI, enum picOption picChosen, time
   if ( objectRSSI == 0 ) {
 
   }
-  else if ( !strcmp (objectType,"Bike") && picChosen != apple && objectRSSI < thresholdNear) {
-    nearStatus++;
-    if(nearStatus>1){
-      picChosen = apple;
-      *picTimer = time(NULL);
-      status = system("./dokermit6");
-    }
+  else if ((int)(difftime(time(NULL), *picTimer)) >= 60) {
+    picChosen = black;
+    *picTimer = time(NULL);
+    status = system("../download-playlist exbihition.script");
   }
-  else if ( !strcmp (objectType,"Bike") && picChosen != starbucks && objectRSSI > thresholdFar) {
-    nearStatus--;
-    if(nearStatus<1){
+  else if ( !strcmp (objectType,"Bike") && picChosen != apple && objectRSSI < thresholdNear && direction == 1) {
+    // nearStatus++;
+    // if(nearStatus>1){
+        picChosen = apple;
+        *picTimer = time(NULL);
+        status = system("./dokermit6");
+    // }
+  }
+  else if ( !strcmp (objectType,"Bike") && picChosen != cslogo && objectRSSI < thresholdNear && direction == 0) {
+    // nearStatus++;
+    // if(nearStatus>1){
+        picChosen = cslogo;
+        *picTimer = time(NULL);
+        status = system("./dokermit8");
+    // }
+  }
+  else if ( !strcmp (objectType,"Bike") && picChosen != starbucks && objectRSSI > thresholdFar && direction == 1) {
+    // nearStatus--;
+    // if(nearStatus<1){
       picChosen = starbucks;
       *picTimer = time(NULL);
       status = system("./dokermit7");
-    }
+    // }
+  }
+  else if ( !strcmp (objectType,"Bike") && picChosen != ncculogo && objectRSSI > thresholdFar && direction == 0) {
+    // nearStatus--;
+    // if(nearStatus<1){
+      picChosen = ncculogo;
+      *picTimer = time(NULL);
+      status = system("./dokermit9");
+    // }
   }
   else if ( !strcmp (objectType,"Sto1") && picChosen != cat && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
     picChosen = cat;
@@ -316,7 +355,7 @@ const char* getPicChosenName(enum picOption picChosen)
       case apple: return "apple";
       case starbucks: return "starbucks";
       case cslogo: return "cslogo";
-      case zbama: return "zbama";
+      case ncculogo: return "ncculogo";
       case cat: return "cat";
       case dog: return "dog";
       case natalie_fish: return "natalie_fish";
