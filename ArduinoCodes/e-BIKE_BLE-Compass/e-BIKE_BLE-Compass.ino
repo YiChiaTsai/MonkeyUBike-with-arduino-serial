@@ -72,13 +72,14 @@ void loop()
     queryBaud = false;
   }
   
-  if(compassCount%20000 == 0) {
-    calculateIMU();
-    compassCount = 1;
-  }
-  else {
-    compassCount++;
-  }
+  calculateIMU();
+//  if(compassCount%20000 == 0) {
+//    calculateIMU();
+//    compassCount = 1;
+//  }
+//  else {
+//    compassCount++;
+//  }
 }
 
 void calculateIMU(){
@@ -127,6 +128,10 @@ void Output(MagnetometerRaw raw, MagnetometerScaled scaled, float heading, float
     writePerMessage("Deg2-Degr: ");
     writePerVariable( String(headingDegrees) );
     writePerMessage("!");
+//    Serial.print("Deg2-Degr: ");
+//    Serial.print( String(headingDegrees) );
+//    Serial.println("!");
+    delay(1000);
 }
 
 void writePerMessage(char* message){

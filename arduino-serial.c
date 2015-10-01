@@ -61,13 +61,12 @@
 /*Written by Richard Tsai*/
 int nearStatus = 1;
 int direction = 1; // 1 means same direction, 0 means adversity.
-int degree1 = 0;
+int degree1 = 252;
 int degree2 = 0;
-const int thresholdFar = 70; //Reality: 70, Laboratory: 70.
-const int thresholdNear = 60; //Reality: 60, Laboratory: 55.
-const int thresholdStore = 60; //Reality: 60, Laboratory: 55.
-enum picOption { black, num1, num2, num3, num4, num5, apple, starbucks, cslogo, ncculogo, cat, dog, natalie_fish };
-
+const int thresholdFar = 75; //Reality: 70, Laboratory: 70.
+const int thresholdNear = 65; //Reality: 60, Laboratory: 55.
+const int thresholdStore = 100; //Reality: 60, Laboratory: 55.
+enum picOption { black, near1p, far1p, near0p, far0p, monkeylightpro, ncculogo, cslogo, DCT, zoopanda, apple, starbucks, TaylorSwift, TomCruise, ttsai, RichardTsai, cat, dog, natalie_fish, cslogov, zoologov, siubike, taipei101old, taipei101new, near1v, far1v, near0v, far0v, cinemav, readingv, Taiwanflagv };
 //
 void usage(void)
 {
@@ -233,11 +232,15 @@ int main(int argc, char *argv[])
               }
               else if(!strcmp (objectType,"Deg1")) {
                 degree1 = atoi(stringValue);
-                printf("111 %s: %d\n\n", objectType, degree1);
+                printf("%s: %d\n\n", objectType, degree1);
               }
               else if(!strcmp (objectType,"Deg2")) {
                 degree2 = atoi(stringValue);
-                printf("222222 %s: %d\n\n", objectType, degree1);
+                printf("%s: %d\n\n", objectType, degree2);
+              }
+              else {
+                objectRSSI = atoi(stringValue);
+                printf("%s: %d\n\n", objectType, objectRSSI);
               }
 
               if( abs(degree1-degree2) > 90 && abs(degree1-degree2) < 270 )
@@ -245,11 +248,13 @@ int main(int argc, char *argv[])
               else
                 direction = 1;
 
+              printf("Direction: %d\n\n", direction);
+
               // printf("%s\n\n", buf);
               picChosen = MLP_picture(objectType, objectRSSI, picChosen, &picTimer);
 
               // Mac_music
-              // ./arduino-serial -b 115200 -p /dev/tty.wchusbserial1410 -q -r -F
+              // ./arduino-serial -b 115200 -p /dev/tty.usbmodem1411 -q -r -F
 
             } while(strcmp (buf,"MLPEnd") != 0);
             break;
@@ -273,57 +278,62 @@ int MLP_picture(char* objectType, int objectRSSI, enum picOption picChosen, time
   if ( objectRSSI == 0 ) {
 
   }
-  else if ((int)(difftime(time(NULL), *picTimer)) >= 60) {
+  else if ( picChosen != black && (int)(difftime(time(NULL), *picTimer)) >= 60) {
     picChosen = black;
     *picTimer = time(NULL);
-    status = system("../download-playlist exbihition.script");
+    status = system("../download-playlist exhibition.script");
   }
-  else if ( !strcmp (objectType,"Bike") && picChosen != apple && objectRSSI < thresholdNear && direction == 1) {
+  else if ( !strcmp (objectType,"Bike") && picChosen != near1p && objectRSSI < thresholdNear && direction == 1) {
     // nearStatus++;
     // if(nearStatus>1){
-        picChosen = apple;
+        picChosen = near1p;
         *picTimer = time(NULL);
-        status = system("./dokermit6");
+        status = system("./dokermit1");
     // }
   }
-  else if ( !strcmp (objectType,"Bike") && picChosen != cslogo && objectRSSI < thresholdNear && direction == 0) {
+  else if ( !strcmp (objectType,"Bike") && picChosen != far1p && objectRSSI > thresholdFar && direction == 1) {
     // nearStatus++;
     // if(nearStatus>1){
-        picChosen = cslogo;
+        picChosen = far1p;
         *picTimer = time(NULL);
-        status = system("./dokermit8");
+        status = system("./dokermit2");
     // }
   }
-  else if ( !strcmp (objectType,"Bike") && picChosen != starbucks && objectRSSI > thresholdFar && direction == 1) {
+  else if ( !strcmp (objectType,"Bike") && picChosen != near0p && objectRSSI < thresholdNear && direction == 0) {
     // nearStatus--;
     // if(nearStatus<1){
-      picChosen = starbucks;
+      picChosen = near0p;
       *picTimer = time(NULL);
-      status = system("./dokermit7");
+      status = system("./dokermit3");
     // }
   }
-  else if ( !strcmp (objectType,"Bike") && picChosen != ncculogo && objectRSSI > thresholdFar && direction == 0) {
+  else if ( !strcmp (objectType,"Bike") && picChosen != far0p && objectRSSI > thresholdFar && direction == 0) {
     // nearStatus--;
     // if(nearStatus<1){
-      picChosen = ncculogo;
+      picChosen = far0p;
       *picTimer = time(NULL);
-      status = system("./dokermit9");
+      status = system("./dokermit4");
     // }
   }
-  else if ( !strcmp (objectType,"Sto1") && picChosen != cat && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
-    picChosen = cat;
+  else if ( !strcmp (objectType,"Sto1") && picChosen != siubike && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 1 ) {
+    picChosen = siubike;
     *picTimer = time(NULL);
-    status = system("../download-playlist exbihition10.script");
+    status = system("../download-playlist exhibition21.script");
   }
-  else if ( !strcmp (objectType,"Sto2") && picChosen != natalie_fish && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
-    picChosen = natalie_fish;
+  else if ( !strcmp (objectType,"Sto2") && picChosen != taipei101new && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 1 ) {
+    picChosen = taipei101new;
     *picTimer = time(NULL);
-    status = system("../download-playlist exbihition12.script");
+    status = system("../download-playlist exhibition23.script");
   }
-  else if ( !strcmp (objectType,"Sto3") && picChosen != dog && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
-    picChosen = dog;
+  else if ( !strcmp (objectType,"Sto3") && picChosen != cinemav && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 1 ) {
+    picChosen = cinemav;
     *picTimer = time(NULL);
-    status = system("../download-playlist exbihition11.script");
+    status = system("../download-playlist exhibition28.script");
+  }
+  else if ( !strcmp (objectType,"Sto4") && picChosen != cslogov && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 1 ) {
+    picChosen = cslogov;
+    *picTimer = time(NULL);
+    status = system("../download-playlist exhibition19.script");
   }
   //   // status = system("./dokermit8");
   //   // /*Spawn a child to run the program.*/
@@ -347,19 +357,36 @@ const char* getPicChosenName(enum picOption picChosen)
      switch (picChosen)
    {
       case black: return "black";
-      case num1: return "num1";
-      case num2: return "num2";
-      case num3: return "num3";
-      case num4: return "num4";
-      case num5: return "num5";
+      case near1p: return "near1p";
+      case far1p: return "far1p";
+      case near0p: return "near0p";
+      case far0p: return "far0p";
+      case monkeylightpro: return "monkeylightpro";
+      case ncculogo: return "ncculogo";
+      case cslogo: return "cslogo";
+      case DCT: return "DCT";
+      case zoopanda: return "zoopanda";
       case apple: return "apple";
       case starbucks: return "starbucks";
-      case cslogo: return "cslogo";
-      case ncculogo: return "ncculogo";
+      case TaylorSwift: return "TaylorSwift";
+      case TomCruise: return "TomCruise";
+      case ttsai: return "ttsai";
+      case RichardTsai: return "RichardTsai";
       case cat: return "cat";
       case dog: return "dog";
       case natalie_fish: return "natalie_fish";
-
+      case cslogov: return "cslogov";
+      case zoologov: return "zoologov";
+      case siubike: return "siubike";
+      case taipei101old: return "taipei101old";
+      case taipei101new: return "taipei101new";
+      case near1v: return "near1v";
+      case far1v: return "far1v";
+      case near0v: return "near0v";
+      case far0v: return "far0v";
+      case cinemav: return "cinemav";
+      case readingv: return "readingv";
+      case Taiwanflagv: return "Taiwanflagv";
       /* etc... */
    }
 }

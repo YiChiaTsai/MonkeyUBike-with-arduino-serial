@@ -1,4 +1,7 @@
 #include <HMC5883L.h>
+#include <SoftwareSerial.h>
+
+SoftwareSerial BTSerial(10, 11);    // 設定軟體序列埠(接收腳RX,傳送腳TX)
 
 /*
 HMC5883L_Example.ino - Example sketch for integration with an HMC5883L triple axis magnetometer.
@@ -34,25 +37,26 @@ void setup()
 {
   // Initialize the serial port.
   Serial.begin(115200);
-
-  Serial.println("Starting the I2C interface.");
+  BTSerial.begin(115200);
+  
+//  Serial.println("Starting the I2C interface.");
   Wire.begin(); // Start the I2C interface.
 
-  Serial.println("Constructing new HMC5883L");
+//  Serial.println("Constructing new HMC5883L");
   compass = HMC5883L(); // Construct a new HMC5883 compass.
   //The implementation of the class is provided in the library
   
   // Now we have an istance of the class!
   //Let's initializate it...
   
-  Serial.println("Setting scale to +/- 1.3 Ga");
+//  Serial.println("Setting scale to +/- 1.3 Ga");
   error = compass.SetScale(1.3); // Set the scale of the compass to 1.3Ga
   if(error != 0){ // If there is an error, print it out. 
     Serial.println(compass.GetErrorText(error));
     error =0;
   }
 
-  Serial.println("Setting measurement mode to continous.");
+//  Serial.println("Setting measurement mode to continous.");
   error = compass.SetMeasurementMode(Measurement_Continuous); // Set the measurement mode to Continuous
   if(error != 0) {// If there is an error, print it out.
     Serial.println(compass.GetErrorText(error)); //Todo: Error handling for this method in .h and .cpp
@@ -130,6 +134,20 @@ void Output(MagnetometerRaw raw, MagnetometerScaled scaled, float heading, float
   Serial.print("Bike-Degr: ");
   Serial.print(headingDegrees);
   Serial.println("!");
-  delay(500);
-//  Serial.println(" Degrees   \t");
+  
+  
+  writeBTMessage("Bike-Degr: ");
+  writeBTVariable((String)headingDegrees);
+  writeBTMessage("!\n");
+  delay(1000);
+}
+
+void writeBTMessage(char* message){
+  BTSerial.write(message);
+}
+void writeBTVariable(String variable){
+  char BTSerialVariable[100] = {'\0'};
+ 
+  variable.toCharArray(BTSerialVariable, 100);
+  BTSerial.write(BTSerialVariable);
 }

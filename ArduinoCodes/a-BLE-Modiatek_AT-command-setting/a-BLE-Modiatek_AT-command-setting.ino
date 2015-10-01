@@ -9,8 +9,8 @@ void setup()
 {
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
-  BTSerial.begin(9600);  // 啟動軟體序列埠,設定傳輸速度
-  Serial.begin(9600);
+  BTSerial.begin(115200);  // 啟動軟體序列埠,設定傳輸速度
+  Serial.begin(115200);
 }
 
 void loop()
@@ -49,8 +49,8 @@ void loop()
         BTSerial.write("AT\r\n");
         break;
       case  'b' :     // Set ble's name CENTRAL PERIPHERAL
-        Serial.println("AT+NAMEMAC-DATA\r");
-        BTSerial.write("AT+NAMEMAC-DATA\r\n");
+        Serial.println("AT+NAMEBIKE-PERIPHERAL\r");
+        BTSerial.write("AT+NAMEBIKE-PERIPHERAL\r\n");
         break;
       case  'c' :     // Set password
         Serial.println("AT+PIN835865\r");
@@ -64,7 +64,7 @@ void loop()
         Serial.println("AT+BAUD\r");
         BTSerial.write("AT+BAUD\r\n");
         break;
-      case  'f' :     // Set role as peripheral
+      case  'f' :     // Set role as central1, peripheral2
         Serial.println("AT+ROLE0\r");
         BTSerial.write("AT+ROLE0\r\n");
         break;
@@ -72,15 +72,15 @@ void loop()
         Serial.println("AT+LADDR\r");
         BTSerial.write("AT+LADDR\r\n");
         break;
-      case  'h' :     // Get Inquire mode: mode, num, timeout
-        Serial.println("AT+INQM0,3,25\r");
-        BTSerial.write("AT+INQM0,3,25\r\n");
+      case  'h' :     // 0,3,25Get Inquire mode: mode, num, timeout
+        Serial.println("AT+INQM0,3,5\r");
+        BTSerial.write("AT+INQM0,3,5\r\n");
         break;
       case  'i' :     // (Bike which provides broadcast.) Set Inquire mode: mode, num, timeout
         Serial.println("AT+INQM0,8,5\r");
         BTSerial.write("AT+INQM0,8,5\r\n");
         break;
-      case  'j' :     // (Store and Bind which provide connect.) Set Inquire mode: mode, num, timeout
+      case  'j' :     // MAC-CENTRAL MLP-PERIPHERAL (Store and Bind which provide connect.) Set Inquire mode: mode, num, timeout
         Serial.println("AT+INQM2,8,5\r");
         BTSerial.write("AT+INQM2,8,5\r\n");
         break;  
@@ -92,20 +92,20 @@ void loop()
         Serial.println("AT+AUTOCONN\r");
         BTSerial.write("AT+AUTOCONN\r\n");
         break;
-      case  'm' :     // (Do set this!) Set autoinquire setting as false
+      case  'm' :     // MAC-CENTRAL (Do set this!) Set autoinquire setting as false
         Serial.println("AT+AUTOINQ0\r");
         BTSerial.write("AT+AUTOINQ0\r\n");
         break;
-      case  'n' :     // (Bike which provides broadcast.) Set autoconnect setting as false
+      case  'n' :     // MAC-CENTRAL (Bike which provides broadcast.) Set autoconnect setting as false
         Serial.println("AT+AUTOCONN0\r");
         BTSerial.write("AT+AUTOCONN0\r\n");
         break;
-      case  'o' :     // (Do not set this! But MLP-PERIPHERAL should set this!) Set autoinquire setting as true
+      case  'o' :     // MLP-PERIPHERAL (Do not set this! But MLP-PERIPHERAL should set this!) Set autoinquire setting as true
         Serial.println("AT+AUTOINQ1\r");
         BTSerial.write("AT+AUTOINQ1\r\n");
         break;
       case  'p' :     // (Store which provides connect.) Set autoconnect setting as true
-        Serial.println("AT+AUTOCONN1\r");
+        Serial.println("AT+AUTOCONN1\rr");
         BTSerial.write("AT+AUTOCONN1\r\n");
         break;
       case  'q' :     // Start inquiring nearby BLE
@@ -117,8 +117,8 @@ void loop()
         BTSerial.write("AT+BIND\r\n");
         break;
       case  's' :     // Set bind address
-        Serial.println("AT+BIND80,C1,BE,26,18,98\r");
-        BTSerial.write("AT+BIND80,C1,BE,26,18,98\r\n");
+        Serial.println("AT+BIND80,C8,D2,25,82,06\r");
+        BTSerial.write("AT+BIND80,C8,D2,25,82,06\r\n");
         break;    
       case  't' :     // Get cmode state
         Serial.println("AT+CMODE\r");
@@ -128,7 +128,7 @@ void loop()
         Serial.println("AT+CMODE0\r");
         BTSerial.write("AT+CMODE0\r\n");
         break;  
-      case  'v' :     // For bind mode, you must set as this.
+      case  'v' :     // MAC-CENTRAL MLP-PERIPHERAL For bind mode, you must set as this.
         Serial.println("AT+CMODE1\r");
         BTSerial.write("AT+CMODE1\r\n");
         break;

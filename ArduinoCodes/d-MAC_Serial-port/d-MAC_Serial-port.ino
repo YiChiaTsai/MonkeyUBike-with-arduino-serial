@@ -8,14 +8,9 @@ String ATReturn = "";
 String ATReturnDATA = "";
 
 void setup()
-{
-  pinMode(13, OUTPUT);
-  pinMode(12, OUTPUT);
-  digitalWrite(13, HIGH);
-  digitalWrite(12, HIGH);
-  
-  Serial1.begin(115200);
-  Serial2.begin(115200);
+{ 
+  Serial1.begin(115200); //MAC-CENTRAL
+  Serial2.begin(115200); //MAC-DATA
   Serial.begin(115200);
 }
 

@@ -20,9 +20,9 @@ HMC5883L_Example.ino - Example sketch for integration with an HMC5883L triple ax
 // Reference the HMC5883L Compass Library
 #include <HMC5883L.h>
 
-#include <SoftwareSerial.h>  // 使用arduino內建(軟體序列埠)程式庫
-SoftwareSerial BTSerialPer(10, 11);    // MLP-PERIPHERAL設定軟體序列埠(接收腳RX,傳送腳TX)
-SoftwareSerial BTSerialCen(8, 9);    // MLP-B1-CENTRAL
+//#include <SoftwareSerial.h>  // 使用arduino內建(軟體序列埠)程式庫
+//SoftwareSerial BTSerialPer(10, 11);    // MLP-PERIPHERAL設定軟體序列埠(接收腳RX,傳送腳TX) change to Serial2 on due
+//SoftwareSerial BTSerialCen(8, 9);    // MLP-B1-CENTRAL change to Serial3 on due
 
 #define OCTAVE_OFFSET 0
 
@@ -62,45 +62,26 @@ boolean queryBaud = true;
 
 String ATReturnPer = "";
 String ATReturnCen = "";
+String ATReturnUNO = "";
 
 int counterRSSI = 0;
 int arrayRSSI[3] = {0};
 int averageRSSI = 0;
 
-// Store our compass as an object.
-HMC5883L compass;
-int compassCount = 0;
-// Record any errors that may occur in the compass.
-int error = 0;
-
 void setup()
 {
-  pinMode(13, OUTPUT);
-  digitalWrite(13, HIGH);
-  BTSerialPer.begin(115200);  // 啟動軟體序列埠,設定傳輸速度
-  BTSerialCen.begin(115200);
-  Serial.begin(115200);
-  
-  Wire.begin(); // Start the I2C interface.
-  compass = HMC5883L(); // Construct a new HMC5883 compass.
-  //The implementation of the class is provided in the library
-  
-  // Now we have an istance of the class!
-  // Let's initializate it...
-  
-  // Setting scale to +/- 1.3 Ga
-  error = compass.SetScale(1.3); // Set the scale of the compass to 1.3Ga
-  if(error != 0){ // If there is an error, print it out. 
-    Serial.println(compass.GetErrorText(error));
-    error =0;
-  }
-
-  // Setting measurement mode to continous.
-  error = compass.SetMeasurementMode(Measurement_Continuous); // Set the measurement mode to Continuous
-  if(error != 0) {// If there is an error, print it out.
-    Serial.println(compass.GetErrorText(error)); //Todo: Error handling for this method in .h and .cpp
-    error=0;
-  }
+  pinMode(11, OUTPUT);
+  pinMode(12, OUTPUT);
+  digitalWrite(11, LOW);
+  digitalWrite(12, LOW);
+  pinMode(13, OUTPUT);           // set pin to input
+  digitalWrite(13, HIGH);       // turn on pullup resistors
+  Serial1.begin(115200);  //MLP-UNO
+  //BTSerialPer.begin(115200);  // 啟動軟體序列埠,設定傳輸速度
+  Serial2.begin(115200); //MLP-PERIPHERAL
+  //BTSerialCen.begin(115200);
+  Serial3.begin(115200); //MLP-CENTRAL
+  Serial.begin(115200); 
 }
 
 void loop()
@@ -110,101 +91,65 @@ void loop()
     queryBaud = false;
   }
   
-//  seizeAddrRSSI();
-  if (BTSerialCen.available() > 0)
+  seizeAddrRSSI();
+  if (Serial3.available() > 0)
   {
     delay(5);
-    while ( BTSerialCen.available() ){
+    while ( Serial3.available() ){
       delay(1); // Because return value is too long
-      char c = BTSerialCen.read();
+      char c = Serial3.read();
       ATReturnCen += c;
     }
       notifyAddrRSSI( ATReturnCen );
+//      Serial.println( ATReturnCen );
       ATReturnCen = "";
   }
   
-  if (BTSerialPer.available() > 0) 
+  if (Serial2.available() > 0) 
   {
     delay(5);
-    while ( BTSerialPer.available() ){
+    while ( Serial2.available() ){
       delay(1); // Because return value is too long
-      char c = BTSerialPer.read();
+      char c = Serial2.read();
       ATReturnPer += c;
     }
-//      if(ATReturnPer == "x") {
-//        digitalWrite(13, HIGH);
-//      }
-//      else if(ATReturnPer == "y") {
-        digitalWrite(13, LOW);
-//      }
+      if(ATReturnPer == "x") {
+        digitalWrite(12, HIGH);
+        digitalWrite(11, LOW);
+      }
+      else if(ATReturnPer == "y") {
+        digitalWrite(12, LOW);
+        digitalWrite(11, LOW);
+      }
       
       Serial.println(ATReturnPer);
       ATReturnPer = "";
   }
   
-  if(compassCount%20000 == 0) {
-    calculateIMU();
-    compassCount = 1;
+  if (Serial1.available() > 0) 
+  {
+    delay(100);
+    while ( Serial1.available() ){
+      delay(1);
+      char c = Serial1.read();
+      if(c == '!'){
+        ATReturnUNO += c;
+        break;
+      }
+      ATReturnUNO += c;
+    }
+//      Serial.print(ATReturnUNO);
+//      writePerMessage("Deg1-Degr: ");
+//      writePerVariable(  );
+//      writePerMessage("!");
+      
+      ATReturnUNO = "";
   }
-  else {
-    compassCount++;
-  }
-}
-
-void calculateIMU(){
-  // Retrieve the raw values from the magnetometer (not scaled).
-  MagnetometerRaw raw = compass.ReadRawAxis();
-  // Retrieve the scaled values from the magnetometer (scaled to the configured scale).
-  MagnetometerScaled scaled = compass.ReadScaledAxis();
-
-  // Values are accessed like so:
-  int MilliGauss_OnThe_XAxis = scaled.XAxis;// (or YAxis, or ZAxis)
-
-  // Calculate heading when the magnetometer is level, then correct for signs of axis.
-  // Atan2() automatically check the correct formula taking care of the quadrant you are in
-  float heading = atan2(scaled.YAxis, scaled.XAxis);
-
-  // Once you have your heading, you must then add your 'Declination Angle',
-  // which is the 'Error' of the magnetic field in your location. Mine is 0.0404 
-  // Find yours here: http://www.magnetic-declination.com/
-  
-  // If you cannot find your Declination, comment out these two lines, your compass will be slightly off.
-  float declinationAngle = -1.2404;
-  heading += declinationAngle;
-
-  // Correct for when signs are reversed.
-  if(heading < 0)
-    heading += 2*PI;
-
-  // Check for wrap due to addition of declination.
-  if(heading > 2*PI)
-    heading -= 2*PI;
-
-  // Convert radians to degrees for readability.
-  float headingDegrees = heading * 180/M_PI; 
-
-  // Output the data via the serial port.
-  Output(raw, scaled, heading, headingDegrees);
-
-  // By default the HMC5883L reads the data 15 time per second (15Hz)
-  // However since we have a long serial out (104ms at 9600) we will let
-  // it run at its natural speed.
-  // delay(66);
-}
-// Output the data down the serial port.
-void Output(MagnetometerRaw raw, MagnetometerScaled scaled, float heading, float headingDegrees)
-{
-    writePerMessage("Deg1-Degr: ");
-    writePerVariable( String(headingDegrees) );
-    writePerMessage("!");
-    Serial.print("Deg1-Deg1: ");
-    Serial.print( String(headingDegrees) );
-    Serial.println("!");
 }
 
 void seizeAddrRSSI()
 {
-  delay(10);
+//  delay(10);
   writeCenMessage("AT+INQ\r\n");
 }
 
@@ -231,7 +176,7 @@ void notifyAddrRSSI( String ATReturnCen )
         writePerMessage("!");   
     }
   //Store1
-    indexINQ = ATReturnCen.indexOf("+INQ: 80:C1:BE:27:22:18,FF00,-");
+    indexINQ = ATReturnCen.indexOf("+INQ: 80:C8:D2:28:30:93,FF00,-");
     if( indexINQ != -1){
       indexINQ += 30;
       int RSSISignalInt = 0;
@@ -240,9 +185,12 @@ void notifyAddrRSSI( String ATReturnCen )
       writePerMessage("Sto1-RSSI: ");
       writePerVariable( String(RSSISignalInt) );
       writePerMessage("!");
+//      Serial.print("Sto1-RSSI: ");
+//      Serial.print( String(RSSISignalInt) );
+//      Serial.println("!");
     }
   //Store2
-    indexINQ = ATReturnCen.indexOf("+INQ: 80:BC:72:42:65:98,FF00,-");
+    indexINQ = ATReturnCen.indexOf("+INQ: 80:C7:DE:63:74:A2,FF00,-");
     if( indexINQ != -1){
       indexINQ += 30;
       int RSSISignalInt = 0;
@@ -251,39 +199,81 @@ void notifyAddrRSSI( String ATReturnCen )
       writePerMessage("Sto2-RSSI: ");
       writePerVariable( String(RSSISignalInt) );
       writePerMessage("!");
+//      Serial.print("Sto2-RSSI: ");
+//      Serial.print( String(RSSISignalInt) );
+//      Serial.println("!");
     }
   //Store3
-//    indexINQ = ATReturnCen.indexOf("+INQ: 88:0F:10:23:AB:69,FF00,-");
-//    if( indexINQ != -1){
-//      play_rtttl(song);
-//      indexINQ += 30;
-//      int RSSISignalInt = 0;
-//      RSSISignalInt = (ATReturnCen[indexINQ]-48)*10 + (ATReturnCen[indexINQ+1]-48);
-//      
-//      writePerMessage("Sto3-RSSI: ");
-//      writePerVariable( String(RSSISignalInt) );
-//      writePerMessage("!");
-//    }  
+    indexINQ = ATReturnCen.indexOf("+INQ: 80:BC:72:42:65:98,FF00,-");
+    if( indexINQ != -1){
+      indexINQ += 30;
+      int RSSISignalInt = 0;
+      RSSISignalInt = (ATReturnCen[indexINQ]-48)*10 + (ATReturnCen[indexINQ+1]-48);
+      
+      writePerMessage("Sto3-RSSI: ");
+      writePerVariable( String(RSSISignalInt) );
+      writePerMessage("!");
+//      Serial.print("Sto3-RSSI: ");
+//      Serial.print( String(RSSISignalInt) );
+//      Serial.println("!");
+    }
+  //Store4
+    indexINQ = ATReturnCen.indexOf("+INQ: 80:C1:BE:27:22:18,FF00,-");
+    if( indexINQ != -1){
+      indexINQ += 30;
+      int RSSISignalInt = 0;
+      RSSISignalInt = (ATReturnCen[indexINQ]-48)*10 + (ATReturnCen[indexINQ+1]-48);
+      
+      writePerMessage("Sto4-RSSI: ");
+      writePerVariable( String(RSSISignalInt) );
+      writePerMessage("!");
+//      Serial.print("Sto4-RSSI: ");
+//      Serial.print( String(RSSISignalInt) );
+//      Serial.println("!");
+    }
+  //Store5
+    indexINQ = ATReturnCen.indexOf("+INQ: ,FF00,-");
+    if( indexINQ != -1){
+      indexINQ += 30;
+      int RSSISignalInt = 0;
+      RSSISignalInt = (ATReturnCen[indexINQ]-48)*10 + (ATReturnCen[indexINQ+1]-48);
+      
+      writePerMessage("Sto5-RSSI: ");
+      writePerVariable( String(RSSISignalInt) );
+      writePerMessage("!");
+    }
+  //Music
+    indexINQ = ATReturnCen.indexOf("+INQ: ,FF00,-");
+    if( indexINQ != -1){
+      play_rtttl(song);
+      indexINQ += 30;
+      int RSSISignalInt = 0;
+      RSSISignalInt = (ATReturnCen[indexINQ]-48)*10 + (ATReturnCen[indexINQ+1]-48);
+      
+      writePerMessage("Musi-RSSI: ");
+      writePerVariable( String(RSSISignalInt) );
+      writePerMessage("!");
+    }      
 }
 
 void writePerMessage(char* message){
-  BTSerialPer.write(message);
+  Serial2.write(message);
 }
 void writePerVariable(String variable){
   char BTSerialVariable[100] = {'\0'};
  
   variable.toCharArray(BTSerialVariable, 100);
-  BTSerialPer.write(BTSerialVariable);
+  Serial2.write(BTSerialVariable);
 }
 
 void writeCenMessage(char* message){
-  BTSerialCen.write(message);
+  Serial3.write(message);
 }
 void writeCenVariable(String variable){
   char BTSerialVariable[100] = {'\0'};
  
   variable.toCharArray(BTSerialVariable, 100);
-  BTSerialCen.write(BTSerialVariable);
+  Serial3.write(BTSerialVariable);
 }
 
 void play_rtttl(char *p)
@@ -437,9 +427,9 @@ void play_rtttl(char *p)
         Serial.print(notes[(scale - 4) * 12 + note], 10);
         Serial.print(") ");
         Serial.println(duration, 10);
-        tone(tonePin, notes[(scale - 4) * 12 + note]);
+        //tone(tonePin, notes[(scale - 4) * 12 + note]);
         delay(duration);
-        noTone(tonePin); 
+        //noTone(tonePin); 
       }
       else
       {

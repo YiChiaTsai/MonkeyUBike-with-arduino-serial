@@ -54,9 +54,9 @@ struct MagnetometerScaled
 
 struct MagnetometerRaw
 {
-	int XAxis;
-	int YAxis;
-	int ZAxis;
+	int16_t XAxis;
+ 	int16_t YAxis;
+    	int16_t ZAxis;
 };
 
 class HMC5883L
