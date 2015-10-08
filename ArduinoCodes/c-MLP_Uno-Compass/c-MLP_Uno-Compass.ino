@@ -131,15 +131,15 @@ void Output(MagnetometerRaw raw, MagnetometerScaled scaled, float heading, float
 //  Serial.print(headingDegrees);
 //  Serial.println(" Degrees   \t");
 
-  Serial.print("Bike-Degr: ");
-  Serial.print(headingDegrees);
-  Serial.println("!");
+//  Serial.print("Deg1-Degr: ");
+//  Serial.print(headingDegrees);
+//  Serial.println("!");
   
   
-  writeBTMessage("Bike-Degr: ");
+  writeBTMessage("Deg1-Degr: ");
   writeBTVariable((String)headingDegrees);
-  writeBTMessage("!\n");
-  delay(1000);
+  writeBTMessage("!");
+  delay(10000);
 }
 
 void writeBTMessage(char* message){

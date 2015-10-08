@@ -130,6 +130,6 @@ void Output(MagnetometerRaw raw, MagnetometerScaled scaled, float heading, float
   Serial.print("Bike-Degr: ");
   Serial.print(headingDegrees);
   Serial.println("!");
-  delay(500);
+  delay(1000);
 //  Serial.println(" Degrees   \t");
 }

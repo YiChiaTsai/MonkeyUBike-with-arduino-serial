@@ -9,7 +9,7 @@ String ATReturnDATA = "";
 
 void setup()
 { 
-  Serial1.begin(115200); //MAC-CENTRAL
+  Serial3.begin(115200); //MAC-CENTRAL
   Serial2.begin(115200); //MAC-DATA
   Serial.begin(115200);
 }
@@ -21,15 +21,16 @@ void loop()
     queryBaud = false;
   }
     
-  if (Serial1.available() > 0)  //當arduino+藍牙收到手機 資料
+  if (Serial3.available() > 0)  //當arduino+藍牙收到手機 資料
   {
     delay(5);
-    while ( Serial1.available() ){
+    while ( Serial3.available() ){
       delay(1); // Because return value is too long
-      char c = Serial1.read();
+      char c = Serial3.read();
       ATReturn += c;
     }
       Serial.print( ATReturn );
+//      Serial.println( ATReturn );
       ATReturn = "";
   }
     

@@ -62,7 +62,8 @@ boolean queryBaud = true;
 
 String ATReturnPer = "";
 String ATReturnCen = "";
-String ATReturnUNO = "";
+String ATReturnUNOOld = "";
+String ATReturnUNONew = "";
 
 int counterRSSI = 0;
 int arrayRSSI[3] = {0};
@@ -81,7 +82,7 @@ void setup()
   Serial2.begin(115200); //MLP-PERIPHERAL
   //BTSerialCen.begin(115200);
   Serial3.begin(115200); //MLP-CENTRAL
-  Serial.begin(115200); 
+  Serial.begin(115200);
 }
 
 void loop()
@@ -91,7 +92,7 @@ void loop()
     queryBaud = false;
   }
   
-  seizeAddrRSSI();
+//  seizeAddrRSSI();
   if (Serial3.available() > 0)
   {
     delay(5);
@@ -105,26 +106,26 @@ void loop()
       ATReturnCen = "";
   }
   
-  if (Serial2.available() > 0) 
-  {
-    delay(5);
-    while ( Serial2.available() ){
-      delay(1); // Because return value is too long
-      char c = Serial2.read();
-      ATReturnPer += c;
-    }
-      if(ATReturnPer == "x") {
-        digitalWrite(12, HIGH);
-        digitalWrite(11, LOW);
-      }
-      else if(ATReturnPer == "y") {
-        digitalWrite(12, LOW);
-        digitalWrite(11, LOW);
-      }
-      
-      Serial.println(ATReturnPer);
-      ATReturnPer = "";
-  }
+//  if (Serial2.available() > 0) 
+//  {
+//    delay(5);
+//    while ( Serial2.available() ){
+//      delay(1); // Because return value is too long
+//      char c = Serial2.read();
+//      ATReturnPer += c;
+//    }
+//      if(ATReturnPer == "x") {
+//        digitalWrite(12, HIGH);
+//        digitalWrite(11, LOW);
+//      }
+//      else if(ATReturnPer == "y") {
+//        digitalWrite(12, LOW);
+//        digitalWrite(11, LOW);
+//      }
+//      
+//      Serial.println(ATReturnPer);
+//      ATReturnPer = "";
+//  }
   
   if (Serial1.available() > 0) 
   {
@@ -133,30 +134,34 @@ void loop()
       delay(1);
       char c = Serial1.read();
       if(c == '!'){
-        ATReturnUNO += c;
+        ATReturnUNONew+= c;
         break;
       }
-      ATReturnUNO += c;
+      ATReturnUNONew += c;
     }
-//      Serial.print(ATReturnUNO);
+//    if(ATReturnUNONew != ATReturnUNOOld)
+//      Serial.println(ATReturnUNONew);
 //      writePerMessage("Deg1-Degr: ");
 //      writePerVariable(  );
 //      writePerMessage("!");
+      if(ATReturnUNONew != ATReturnUNOOld)
+        writePerVariable(ATReturnUNONew);
       
-      ATReturnUNO = "";
+      ATReturnUNOOld = ATReturnUNONew;
+      ATReturnUNONew = "";
   }
 }
 
 void seizeAddrRSSI()
 {
-//  delay(10);
+  delay(100);
   writeCenMessage("AT+INQ\r\n");
 }
 
 void notifyAddrRSSI( String ATReturnCen )
 {
   //Bike1
-  int indexINQ = ATReturnCen.indexOf("+INQ: 80:C1:BA:72:DF:E4,FF00,-");
+  int indexINQ = ATReturnCen.indexOf("+INQ: 80:C8:D2:26:5B:BC,FF00,-");
     if( indexINQ != -1){
       indexINQ += 30;
       int RSSISignalInt = 0;
@@ -185,9 +190,9 @@ void notifyAddrRSSI( String ATReturnCen )
       writePerMessage("Sto1-RSSI: ");
       writePerVariable( String(RSSISignalInt) );
       writePerMessage("!");
-//      Serial.print("Sto1-RSSI: ");
-//      Serial.print( String(RSSISignalInt) );
-//      Serial.println("!");
+      Serial.print("Sto1-RSSI: ");
+      Serial.print( String(RSSISignalInt) );
+      Serial.println("!");
     }
   //Store2
     indexINQ = ATReturnCen.indexOf("+INQ: 80:C7:DE:63:74:A2,FF00,-");
@@ -199,9 +204,9 @@ void notifyAddrRSSI( String ATReturnCen )
       writePerMessage("Sto2-RSSI: ");
       writePerVariable( String(RSSISignalInt) );
       writePerMessage("!");
-//      Serial.print("Sto2-RSSI: ");
-//      Serial.print( String(RSSISignalInt) );
-//      Serial.println("!");
+      Serial.print("Sto2-RSSI: ");
+      Serial.print( String(RSSISignalInt) );
+      Serial.println("!");
     }
   //Store3
     indexINQ = ATReturnCen.indexOf("+INQ: 80:BC:72:42:65:98,FF00,-");
@@ -213,9 +218,9 @@ void notifyAddrRSSI( String ATReturnCen )
       writePerMessage("Sto3-RSSI: ");
       writePerVariable( String(RSSISignalInt) );
       writePerMessage("!");
-//      Serial.print("Sto3-RSSI: ");
-//      Serial.print( String(RSSISignalInt) );
-//      Serial.println("!");
+      Serial.print("Sto3-RSSI: ");
+      Serial.print( String(RSSISignalInt) );
+      Serial.println("!");
     }
   //Store4
     indexINQ = ATReturnCen.indexOf("+INQ: 80:C1:BE:27:22:18,FF00,-");
@@ -227,9 +232,9 @@ void notifyAddrRSSI( String ATReturnCen )
       writePerMessage("Sto4-RSSI: ");
       writePerVariable( String(RSSISignalInt) );
       writePerMessage("!");
-//      Serial.print("Sto4-RSSI: ");
-//      Serial.print( String(RSSISignalInt) );
-//      Serial.println("!");
+      Serial.print("Sto4-RSSI: ");
+      Serial.print( String(RSSISignalInt) );
+      Serial.println("!");
     }
   //Store5
     indexINQ = ATReturnCen.indexOf("+INQ: ,FF00,-");
