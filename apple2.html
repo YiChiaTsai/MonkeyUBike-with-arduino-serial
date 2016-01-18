@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>SNA_HW3：101703003  許書軒</title>
+<link href="hw2.css" rel="stylesheet" type="text/css"/>
+		<script>
+			function showBasicInfo( id, info ){
+				document.getElementById(id).innerHTML = info;
+			}
+
+			function pictureClick(){
+				document.getElementById("detail").innerHTML = "<strong>Interest:　　　　　　　</strong><p>Star gazing, Play Go</p><strong>Skill:　 　　　　　　　 </strong><p>Coding</p>";
+			}
+
+		</script>
+</head>
+<body>
+<div id="main">
+<div id="sideZone">
+	<p><img src="head.jpg" alt="myface" height="275" width="220" onclick="pictureClick()" ></p>
+	<b id="name" onmouseover="showBasicInfo(id,'Name　　　　　　　　<p> 許書軒</p>')"
+				 onmouseout= "showBasicInfo(id,'Name　　　　　　　　')">Name　　　　　　　　</b>
+<p></p>
+	<b id="sid" onmouseover="showBasicInfo(id,'Student ID　　　　　　<p> 101703003</p>')"
+				onmouseout= "showBasicInfo(id,'Student ID　　　　　　')">Student ID　　　　　　</b>
+<p></p>
+	<b id="dep" onmouseover="showBasicInfo(id,'Department　  　　　　<p> Computer Science</p>')"
+				onmouseout= "showBasicInfo(id,'Department　　　　  　')">Department 　 　　　　</b>
+<p></p>
+<div id="detail">
+</div>
+</div>
+
+<div id="content">
+	<h1 class="title">關於我 About Me</h1>
+			<h2 onmouseover="style.fontSize='28px'" onmouseout="style.fontSize='24px'">教育經驗 Experience</h2>
+		<dl>
+			<dt></dt>
+			<dd>國立政治大學 資訊科學系 還沒畢業</dd>
+			<dd>國立政治大學 資訊管理學系 還沒畢業</dd>
+			<dd>臺北市立松山高級中學 畢業</dd>
+			<dd>臺北市立信義國民中學 畢業</dd>
+			<dd>臺北市立吳興國民小學 畢業</dd>
+		</dl>
+		<h2 onmouseover="style.fontSize='28px'" onmouseout="style.fontSize='24px'">喜歡的網站 Favorite Websites</h2>
+			<ul>
+				<li><a href="http://nccugo.freeserver.me/index.php" target="_blank">第十一屆政大盃</a></li>
+				<li><a href="http://www.rogerrao.com/" target="_blank">阿炫的天體營</a></li>
+				<li><a href="http://www.phys.ncku.edu.tw/~astrolab/mirrors/apod/archivepix.html" target="_blank">每日一天文圖</a></li>
+				<li><a href="https://www.facebook.com/NCCUAstroClub" target="_blank">政大天文社</a></li>
+			</ul>
+		<h2 onmouseover="style.fontSize='28px'" onmouseout="style.fontSize='24px'">喜歡的一句話 Favorite quote</h2>
+		<blockquote>No Pain No Gain.</blockquote>
+<div id="link">
+<a href="index.html">HTML</a>　|　
+<a href="index-css.html">CSS</a>　|　
+<a href="index-js.html">JS</a>
+</div>
+</div>
+</div>
+</body>
+</html>

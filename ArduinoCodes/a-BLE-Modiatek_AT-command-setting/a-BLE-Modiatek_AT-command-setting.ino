@@ -49,8 +49,8 @@ void loop()
         BTSerial.write("AT\r\n");
         break;
       case  'b' :     // Set ble's name CENTRAL PERIPHERAL
-        Serial.println("AT+NAMEBIKE-PERIPHERAL\r");
-        BTSerial.write("AT+NAMEBIKE-PERIPHERAL\r\n");
+        Serial.println("AT+NAMESTORE6-PERIPHERAL\r");
+        BTSerial.write("AT+NAMESTORE6-PERIPHERAL\r\n");
         break;
       case  'c' :     // Set password
         Serial.println("AT+PIN835865\r");
@@ -64,17 +64,17 @@ void loop()
         Serial.println("AT+BAUD\r");
         BTSerial.write("AT+BAUD\r\n");
         break;
-      case  'f' :     // Set role as central1, peripheral2
-        Serial.println("AT+ROLE0\r");
-        BTSerial.write("AT+ROLE0\r\n");
+      case  'f' :     // Set role as central1, peripheral0
+        Serial.println("AT+ROLE\r");
+        BTSerial.write("AT+ROLE\r\n");
         break;
       case  'g' :     // Get BLE address
         Serial.println("AT+LADDR\r");
         BTSerial.write("AT+LADDR\r\n");
         break;
       case  'h' :     // 0,3,25Get Inquire mode: mode, num, timeout
-        Serial.println("AT+INQM0,3,5\r");
-        BTSerial.write("AT+INQM0,3,5\r\n");
+        Serial.println("AT+INQM\r");
+        BTSerial.write("AT+INQM\r\n");
         break;
       case  'i' :     // (Bike which provides broadcast.) Set Inquire mode: mode, num, timeout
         Serial.println("AT+INQM0,8,5\r");
@@ -116,9 +116,9 @@ void loop()
         Serial.println("AT+BIND\r");
         BTSerial.write("AT+BIND\r\n");
         break;
-      case  's' :     // Set bind address
-        Serial.println("AT+BIND80,C8,D2,25,82,06\r");
-        BTSerial.write("AT+BIND80,C8,D2,25,82,06\r\n");
+      case  's' :     // Set bind address 80:C1:BE:26:18:98 80,C8,B2,58,5D,AF
+        Serial.println("AT+BIND80,C8,B2,58,5D,AF\r");
+        BTSerial.write("AT+BIND80,C8,B2,58,5D,AF\r\n");
         break;    
       case  't' :     // Get cmode state
         Serial.println("AT+CMODE\r");

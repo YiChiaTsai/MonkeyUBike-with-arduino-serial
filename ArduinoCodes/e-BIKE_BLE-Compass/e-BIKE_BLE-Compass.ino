@@ -18,6 +18,7 @@ HMC5883L_Example.ino - Example sketch for integration with an HMC5883L triple ax
 // Reference the I2C Library
 #include <Wire.h>
 // Reference the HMC5883L Compass Library
+
 #include <HMC5883L.h>
 
 #include <SoftwareSerial.h>  // 使用arduino內建(軟體序列埠)程式庫
@@ -128,9 +129,9 @@ void Output(MagnetometerRaw raw, MagnetometerScaled scaled, float heading, float
     writePerMessage("Deg2-Degr: ");
     writePerVariable( String(headingDegrees) );
     writePerMessage("!");
-//    Serial.print("Deg2-Degr: ");
-//    Serial.print( String(headingDegrees) );
-//    Serial.println("!");
+    Serial.print("Deg2-Degr: ");
+    Serial.print( String(headingDegrees) );
+    Serial.println("!");
     delay(1000);
 }
 

@@ -139,6 +139,9 @@ void Output(MagnetometerRaw raw, MagnetometerScaled scaled, float heading, float
   writeBTMessage("Deg1-Degr: ");
   writeBTVariable((String)headingDegrees);
   writeBTMessage("!");
+  Serial.print("Deg1-Degr: ");
+  Serial.print((String)headingDegrees);
+  Serial.println("!");
   delay(10000);
 }
 

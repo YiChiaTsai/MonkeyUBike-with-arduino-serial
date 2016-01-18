@@ -61,11 +61,11 @@
 /*Written by Richard Tsai*/
 int nearStatus = 1;
 int direction = 1; // 1 means same direction, 0 means adversity.
-int degree1 = 160;
+int degree1 = 204;  //165
 int degree2 = 0;
-const int thresholdFar = 75; //Reality: 70, Laboratory: 70.
-const int thresholdNear = 65; //Reality: 60, Laboratory: 55.
-const int thresholdStore = 100; //Reality: 60, Laboratory: 55.
+const int thresholdFar = 77; //Reality: 70, Laboratory: 70.
+const int thresholdNear = 67; //Reality: 60, Laboratory: 55.
+const int thresholdStore = 150; //Reality: 60, Laboratory: 55.
 enum picOption { black, near1p, far1p, near0p, far0p, monkeylightpro, ncculogo, cslogo, DCT, zoopanda, apple, starbucks, TaylorSwift, TomCruise, ttsai, RichardTsai, cat, dog, natalie_fish, cslogov, zoologov, siubike, taipei101old, taipei101new, near1v, far1v, near0v, far0v, cinemav, readingv, Taiwanflagv };
 //
 void usage(void)
@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
               else if(!strcmp (objectType,"Deg1")) {
                 degree1 = atoi(stringValue);
                 printf("%s: %d\n\n", objectType, degree1);
-                // printf("Fuck1!\n");
+                printf("Fuck1!\n");
               }
               else if(!strcmp (objectType,"Deg2")) {
                 degree2 = atoi(stringValue);
@@ -285,17 +285,17 @@ int MLP_picture(char* objectType, int objectRSSI, enum picOption picChosen, time
   if ( objectRSSI == 0 ) {
 
   }
-  else if ( picChosen != black && (int)(difftime(time(NULL), *picTimer)) >= 60) {
-    picChosen = black;
-    *picTimer = time(NULL);
-    // status = system("../download-playlist exhibition.script");
-  }
+  // else if ( picChosen != black && (int)(difftime(time(NULL), *picTimer)) >= 60) {
+  //   picChosen = black;
+  //   *picTimer = time(NULL);
+  //   status = system("../download-playlist exhibition.script");
+  // }
   else if ( !strcmp (objectType,"Bike") && picChosen != near1p && objectRSSI < thresholdNear && direction == 1) {
     // nearStatus++;
     // if(nearStatus>1){
         picChosen = near1p;
         *picTimer = time(NULL);
-        // status = system("./dokermit1");
+        status = system("./dokermit1");
     // }
   }
   else if ( !strcmp (objectType,"Bike") && picChosen != far1p && objectRSSI > thresholdFar && direction == 1) {
@@ -303,44 +303,54 @@ int MLP_picture(char* objectType, int objectRSSI, enum picOption picChosen, time
     // if(nearStatus>1){
         picChosen = far1p;
         *picTimer = time(NULL);
-        // status = system("./dokermit2");
+        status = system("./dokermit2");
     // }
   }
-  else if ( !strcmp (objectType,"Bike") && picChosen != near0p && objectRSSI < thresholdNear && direction == 1) {
+  else if ( !strcmp (objectType,"Bike") && picChosen != near0p && objectRSSI < thresholdNear && direction == 0) {
     // nearStatus--;
     // if(nearStatus<1){
       picChosen = near0p;
       *picTimer = time(NULL);
-      // status = system("./dokermit3");
+      status = system("./dokermit3");
     // }
   }
-  else if ( !strcmp (objectType,"Bike") && picChosen != far0p && objectRSSI > thresholdFar && direction == 1) {
+  else if ( !strcmp (objectType,"Bike") && picChosen != far0p && objectRSSI > thresholdFar && direction == 0) {
     // nearStatus--;
     // if(nearStatus<1){
       picChosen = far0p;
       *picTimer = time(NULL);
-      // status = system("./dokermit4");
+      status = system("./dokermit4");
     // }
   }
   else if ( !strcmp (objectType,"Sto1") && picChosen != taipei101new && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
     picChosen = taipei101new;
     *picTimer = time(NULL);
-    status = system("../download-playlist exhibition23.script");
+    status = system("../download-playlist exhibition25.script");
   }
   else if ( !strcmp (objectType,"Sto2") && picChosen != cslogov && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
     picChosen = cslogov;
     *picTimer = time(NULL);
-    status = system("../download-playlist exhibition19.script");
-  }
-  else if ( !strcmp (objectType,"Sto3") && picChosen != siubike && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
-    picChosen = siubike;
-    *picTimer = time(NULL);
     status = system("../download-playlist exhibition21.script");
   }
-  else if ( !strcmp (objectType,"Sto4") && picChosen != Taiwanflagv && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
-    picChosen = Taiwanflagv;
+  else if ( !strcmp (objectType,"Sto3") && picChosen != starbucks && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
+    picChosen = starbucks;
     *picTimer = time(NULL);
-    status = system("../download-playlist exhibition30.script");
+    status = system("./dokermit11");
+  }
+  else if ( !strcmp (objectType,"Sto4") && picChosen != ncculogo && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
+    picChosen = ncculogo;
+    *picTimer = time(NULL);
+    status = system("./dokermit6");
+  }
+  else if ( !strcmp (objectType,"Sto5") && picChosen != zoopanda && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
+    picChosen = zoopanda;
+    *picTimer = time(NULL);
+    status = system("./dokermit9");
+  }
+  else if ( !strcmp (objectType,"Sto6") && picChosen != siubike && objectRSSI < thresholdStore && (int)(difftime(time(NULL), *picTimer)) >= 8 ) {
+    picChosen = siubike;
+    *picTimer = time(NULL);
+    status = system("../download-playlist exhibition23.script");
   }
   //   // status = system("./dokermit8");
   //   // /*Spawn a child to run the program.*/
